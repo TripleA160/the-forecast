@@ -1,0 +1,23 @@
+{
+  "name": "weather-forecast",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TripleA160/weather-forecast.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TripleA160/weather-forecast/issues"
+  },
+  "homepage": "https://github.com/TripleA160/weather-forecast#readme",
+  "description": "",
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
