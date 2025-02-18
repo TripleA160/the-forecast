@@ -300,6 +300,8 @@ header.floating {
   bottom: 0px;
   box-shadow: 0 0 0 16px rgba(255, 255, 255, 0.1);
   clip-path: inset(50% 0px 0px 50%);
+  transform: translateZ(0);
+  will-change: transform;
 }
 .days-nav-connector::after {
   content: "";
@@ -312,6 +314,8 @@ header.floating {
   bottom: 0px;
   box-shadow: 0 0 0 16px rgba(255, 255, 255, 0.1);
   clip-path: inset(50% 50% 0px 0px);
+  transform: translateZ(0);
+  will-change: transform;
 }
 .days-nav-day.at-left-edge .days-nav-connector::before,
 .days-nav-day.off-edge .days-nav-connector::before {

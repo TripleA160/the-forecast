@@ -105,12 +105,13 @@ window.addEventListener("load", async () => {
   await daysNav.updateUI();
   await hoursNav.updateUI();
 
-  hoursNav.navigateToCurrent();
-
   await daysNav.updateWeather();
   await daysNav.selectDay(
-    daysNav.days.find((day) => day.description === "Today")
+    daysNav.days.find((day) => day.description === "Today"),
+    true
   );
+
+  hoursNav.navigateToCurrent(true);
 
   // Document events
   window.addEventListener("scroll", () => {

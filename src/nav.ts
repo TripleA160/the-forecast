@@ -89,7 +89,7 @@ export class DaysNav {
     this.updateUI();
   }
 
-  async selectDay(day: Day | undefined) {
+  async selectDay(day: Day | undefined, navigateInstantly: boolean = false) {
     const foundDay = this.days.find((d) => d === day);
     if (foundDay) {
       const foundIndex = this.days.indexOf(foundDay);
@@ -110,7 +110,10 @@ export class DaysNav {
         this.selectedDayIndex > 0 &&
         this.selectedDayIndex < this.days.length - 1
       )
-        this.navigateToDay(this.days[this.selectedDayIndex - 1]);
+        this.navigateToDay(
+          this.days[this.selectedDayIndex - 1],
+          navigateInstantly
+        );
 
       await hoursNav.updateWeather(this.selectedDay);
       await this.updateUI();
@@ -119,7 +122,7 @@ export class DaysNav {
     }
   }
 
-  navigateToDay(day: Day) {
+  navigateToDay(day: Day, instant: Boolean = false) {
     const foundDay = this.days.find((d) => d === day);
 
     if (foundDay) {
@@ -128,7 +131,15 @@ export class DaysNav {
         foundLeft -
         (parseFloat(getComputedStyle(this.element!).gap) || 0) -
         (parseFloat(getComputedStyle(this.navArrowBack?.element!).width) || 0);
-      this.daysContainer?.scrollTo({ left: targetLeft });
+      instant
+        ? this.daysContainer?.scrollTo({
+            left: targetLeft,
+            behavior: "instant",
+          })
+        : this.daysContainer?.scrollTo({
+            left: targetLeft,
+            behavior: "smooth",
+          });
     }
   }
 
@@ -307,7 +318,7 @@ export class HoursNav {
     }
   }
 
-  navigateToHour(hour: Hour) {
+  navigateToHour(hour: Hour, instant: boolean = false) {
     const foundHour = this.hours.find((h) => h === hour);
 
     if (foundHour) {
@@ -316,11 +327,19 @@ export class HoursNav {
         foundLeft -
         (parseFloat(getComputedStyle(this.element!).gap) || 0) -
         (parseFloat(getComputedStyle(this.hoursContainer!).gap) || 0);
-      this.hoursContainer?.scrollTo({ left: targetLeft });
+      instant
+        ? this.hoursContainer?.scrollTo({
+            left: targetLeft,
+            behavior: "instant",
+          })
+        : this.hoursContainer?.scrollTo({
+            left: targetLeft,
+            behavior: "smooth",
+          });
     }
   }
 
-  navigateToCurrent() {
+  navigateToCurrent(instant: boolean = false) {
     const currentHour = new Date().getHours();
     const foundHour = this.hours.find((h) => h.hour24 === currentHour);
 
@@ -330,7 +349,15 @@ export class HoursNav {
         foundLeft -
         (parseFloat(getComputedStyle(this.element!).gap) || 0) -
         (parseFloat(getComputedStyle(this.hoursContainer!).gap) || 0);
-      this.hoursContainer?.scrollTo({ left: targetLeft });
+      instant
+        ? this.hoursContainer?.scrollTo({
+            left: targetLeft,
+            behavior: "instant",
+          })
+        : this.hoursContainer?.scrollTo({
+            left: targetLeft,
+            behavior: "smooth",
+          });
     }
   }
 
