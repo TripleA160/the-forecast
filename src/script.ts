@@ -1,5 +1,6 @@
 import { fetchUserLocation, fetchWeatherApi } from "./api-fetcher.js";
 import { DaysNav, HoursNav } from "./nav.js";
+import { CurrentWeatherCard, HourlyWeatherCard } from "./weather-cards.js";
 
 // Initial state
 let locationData: { latitude: number; longitude: number; timezone: string };
@@ -34,12 +35,14 @@ export let weatherData: {
   };
 };
 
-let headerElement: HTMLElement,
+let contentElement: HTMLElement,
+  headerElement: HTMLElement,
   headerWeatherElement: HTMLElement,
-  currentWeatherElement: HTMLElement,
   hourlyWeatherElement: HTMLElement;
 
-export let daysNav: DaysNav, hoursNav: HoursNav;
+export let currentWeatherCard: CurrentWeatherCard,
+  hourlyWeatherCard: HourlyWeatherCard;
+let daysNav: DaysNav, hoursNav: HoursNav;
 
 window.addEventListener("load", async () => {
   // Getting location data
@@ -90,28 +93,19 @@ window.addEventListener("load", async () => {
   };
 
   // Setting document elements
+  contentElement = document.querySelector(".content")!;
   headerElement = document.querySelector("header")!;
   headerWeatherElement = headerElement!.querySelector(".header-weather")!;
-  currentWeatherElement = document.querySelector("#current-weather")!;
-  hourlyWeatherElement = document.querySelector("#hourly-weather")!;
-  hoursNav = new HoursNav();
-  daysNav = new DaysNav();
+  currentWeatherCard = new CurrentWeatherCard(
+    new Date(weatherData.current.time)
+  );
+  hourlyWeatherCard = new HourlyWeatherCard();
 
   // Updating document elements
-  hourlyWeatherElement.append(daysNav.element!, hoursNav.element!);
-
-  daysNav.setDays(weatherData.daily.time);
-
-  await daysNav.updateUI();
-  await hoursNav.updateUI();
-
-  await daysNav.updateWeather();
-  await daysNav.selectDay(
-    daysNav.days.find((day) => day.description === "Today"),
-    true
+  contentElement.append(
+    currentWeatherCard.element!,
+    hourlyWeatherCard.element!
   );
-
-  hoursNav.navigateToCurrent(true);
 
   // Document events
   window.addEventListener("scroll", () => {

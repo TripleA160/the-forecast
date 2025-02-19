@@ -110,6 +110,9 @@ header.floating {
 }
 
 .content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
   padding: 32px 64px;
 }
 
@@ -124,10 +127,6 @@ header.floating {
   background: rgba(200, 200, 200, 0.08);
 }
 
-.current-weather-card {
-  margin-bottom: 32px;
-  height: 380px;
-}
 .current-weather-label,
 .hourly-weather-label {
   position: absolute;
@@ -138,6 +137,13 @@ header.floating {
 .current-weather-time {
   font-size: 14px;
   color: #bebebe;
+}
+.current-weather {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  height: 255px;
 }
 .current-weather-forecast {
   display: flex;
@@ -171,8 +177,7 @@ header.floating {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  align-items: center;
-  align-content: space-between;
+  justify-content: center;
   column-gap: 48px;
   row-gap: 32px;
 }
@@ -187,6 +192,19 @@ header.floating {
 .current-weather-detail-label {
   font-size: 14px;
   color: #bebebe;
+}
+.current-weather-detail-icon,
+.hour-weather-detail-icon {
+  color: #768ec4;
+}
+.current-weather-detail-text,
+.hour-weather-detail-text {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.current-weather-wind-direction {
+  margin-left: 4px;
 }
 
 .hourly-weather-card {
@@ -399,11 +417,11 @@ header.floating {
   left: 0px;
   background-image: radial-gradient(
     ellipse farthest-corner at left center,
-    rgba(22, 37, 68, 1.6),
-    rgba(22, 37, 68, 1.4) 30%,
-    rgba(22, 37, 68, 1.2) 40%,
-    rgba(22, 37, 68, 0.8) 50%,
-    rgba(22, 37, 68, 0.4) 65%,
+    rgba(22, 37, 68, 1.5),
+    rgba(22, 37, 68, 1.3) 30%,
+    rgba(22, 37, 68, 1.1) 40%,
+    rgba(22, 37, 68, 0.7) 50%,
+    rgba(22, 37, 68, 0.3) 65%,
     rgba(22, 37, 68, 0) 73%
   );
 }
@@ -411,11 +429,11 @@ header.floating {
   right: 0px;
   background-image: radial-gradient(
     ellipse farthest-corner at right center,
-    rgba(22, 37, 68, 1.6),
-    rgba(22, 37, 68, 1.4) 30%,
-    rgba(22, 37, 68, 1.2) 40%,
-    rgba(22, 37, 68, 0.8) 50%,
-    rgba(22, 37, 68, 0.4) 65%,
+    rgba(22, 37, 68, 1.5),
+    rgba(22, 37, 68, 1.3) 30%,
+    rgba(22, 37, 68, 1.1) 40%,
+    rgba(22, 37, 68, 0.7) 50%,
+    rgba(22, 37, 68, 0.3) 65%,
     rgba(22, 37, 68, 0) 73%
   );
 }
@@ -478,7 +496,7 @@ header.floating {
 .hour-weather-details {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(3, auto);
+  grid-template-rows: repeat(3, 1fr);
   justify-content: center;
   row-gap: 10px;
 }
@@ -491,12 +509,6 @@ header.floating {
 }
 .hour-weather-detail-icon {
   margin-bottom: 8px;
-  color: #6983bf;
-}
-.hour-weather-detail-text {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 4px;
 }
 .hour-weather-wind-direction {
   margin-left: 2px;

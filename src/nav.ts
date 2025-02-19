@@ -1,4 +1,4 @@
-import { weatherData, daysNav, hoursNav } from "./script.js";
+import { weatherData, hourlyWeatherCard } from "./script.js";
 import { uiIcons, weatherIcons } from "./icon-handler.js";
 
 export class DaysNav {
@@ -72,7 +72,6 @@ export class DaysNav {
       const newDay = new Day(this, newDate);
       this.days.push(newDay);
       this.daysContainer!.appendChild(newDay.element!);
-      if (newDay.description === "Today") this.selectDay(newDay);
     }
   }
 
@@ -115,7 +114,7 @@ export class DaysNav {
           navigateInstantly
         );
 
-      await hoursNav.updateWeather(this.selectedDay);
+      await hourlyWeatherCard.hoursNav.updateWeather(this.selectedDay);
       await this.updateUI();
     } else {
       console.error("Tried to select a day that does not exist");
@@ -162,24 +161,26 @@ export class DaysNav {
   }
 
   async updateUI() {
-    const selectedDayElement = this.selectedDay!.element!;
-    const edgeStatus = this.isDayAtEdge(this.selectedDay!);
+    if (this.selectedDay != null) {
+      const selectedDayElement = this.selectedDay!.element!;
+      const edgeStatus = this.isDayAtEdge(this.selectedDay!);
 
-    if (edgeStatus?.atLeftEdge) {
-      selectedDayElement.classList.add("at-left-edge");
-      selectedDayElement.classList.remove("at-right-edge", "off-edge");
-    } else if (edgeStatus?.atRightEdge) {
-      selectedDayElement.classList.add("at-right-edge");
-      selectedDayElement.classList.remove("at-left-edge", "off-edge");
-    } else if (edgeStatus?.offEdge) {
-      selectedDayElement.classList.add("off-edge");
-      selectedDayElement.classList.remove("at-left-edge", "at-right-edge");
-    } else {
-      selectedDayElement.classList.remove(
-        "at-left-edge",
-        "at-right-edge",
-        "off-edge"
-      );
+      if (edgeStatus?.atLeftEdge) {
+        selectedDayElement.classList.add("at-left-edge");
+        selectedDayElement.classList.remove("at-right-edge", "off-edge");
+      } else if (edgeStatus?.atRightEdge) {
+        selectedDayElement.classList.add("at-right-edge");
+        selectedDayElement.classList.remove("at-left-edge", "off-edge");
+      } else if (edgeStatus?.offEdge) {
+        selectedDayElement.classList.add("off-edge");
+        selectedDayElement.classList.remove("at-left-edge", "at-right-edge");
+      } else {
+        selectedDayElement.classList.remove(
+          "at-left-edge",
+          "at-right-edge",
+          "off-edge"
+        );
+      }
     }
 
     this.navArrowBack!.updateUI();
@@ -371,7 +372,7 @@ export class HoursNav {
     const selectedDayDate = selectedDay.date;
     for (let i = 0; i < this.hours.length; i++) {
       const hour = this.hours[i];
-      const hourDate = new Date(selectedDayDate.setHours(hour.hour24));
+      const hourDate = new Date(selectedDayDate.setHours(hour.hour24, 0));
       const foundIndex = weatherData.hourly.time.findIndex(
         (t) => t === this.#convertDateFormat(hourDate)
       );
@@ -391,8 +392,8 @@ export class HoursNav {
         10;
       if (cloudCover <= 10) hour.description = "Clear sky";
       else if (cloudCover <= 30) hour.description = "Mostly sunny";
-      else if (cloudCover <= 50) hour.description = "Partly cloudy";
-      else if (cloudCover <= 80) hour.description = "Mostly cloudy";
+      else if (cloudCover <= 55) hour.description = "Partly cloudy";
+      else if (cloudCover <= 85) hour.description = "Mostly cloudy";
       else hour.description = "Overcast";
 
       hour.updateElement();
@@ -409,7 +410,7 @@ export class HoursNav {
   }
 }
 
-class Day {
+export class Day {
   element: HTMLElement | null = null;
   nav: DaysNav | null = null;
   date: Date = new Date();
@@ -561,7 +562,7 @@ class Hour {
 
     if (hour24 < 12) {
       this.dayTime = "AM";
-      this.hour12 = this.hour24 === 0 ? 0 : hour24;
+      this.hour12 = this.hour24 === 0 ? 12 : hour24;
     } else {
       this.dayTime = "PM";
       this.hour12 = this.hour24 === 12 ? 12 : hour24 - 12;
@@ -576,7 +577,7 @@ class Hour {
 
     const hourText = document.createElement("div");
     hourText.className = "hour-text";
-    hourText.textContent = `${this.hour12?.toString().padStart(2, "0")}:00${
+    hourText.textContent = `${this.hour12.toString().padStart(2, "0")}:00 ${
       this.dayTime
     }`;
     this.element.appendChild(hourText);
@@ -689,7 +690,7 @@ class Hour {
     windDirectionIcon.className =
       "icon wind-direction-icon hour-weather-wind-direction";
     windDirectionIcon.title = "Wind direction";
-    windDirectionIcon.innerHTML = weatherIcons.windDirectionIcon;
+    windDirectionIcon.innerHTML = weatherIcons.windDirectionIconSmall;
     windText.append(windValue, windUnit, windDirectionIcon);
     windElement.append(windIcon, windText);
 
