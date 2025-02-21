@@ -153,6 +153,13 @@ header.floating .search-results {
   padding: 32px 64px;
 }
 
+.location-message {
+  display: none;
+}
+.location-message.enabled {
+  display: block;
+}
+
 .weather-card {
   display: flex;
   align-items: center;
@@ -282,6 +289,7 @@ header.floating .search-results {
 .scroll-bar.hidden {
   pointer-events: none;
   cursor: auto;
+  opacity: 0;
 }
 .nav-arrow.interactable:hover,
 .scroll-bar.interactable:hover {

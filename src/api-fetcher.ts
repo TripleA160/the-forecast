@@ -1,4 +1,4 @@
-import { isRTL } from "./script.js";
+import { isRTL, locationMessage } from "./script.js";
 
 export async function fetchWeatherApi(
   latitude: Number,
@@ -43,6 +43,7 @@ export async function fetchUserLocation(): Promise<{
     if (navigator.geolocation) {
       return new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(async (position) => {
+          locationMessage.classList.remove("enabled");
           try {
             const response = await fetch(
               `http://api.geonames.org/findNearbyPlaceNameJSON?lat=${position.coords.latitude}&lng=${position.coords.longitude}&username=Triple_A`

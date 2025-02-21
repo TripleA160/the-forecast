@@ -46,39 +46,44 @@ export let weatherData: {
 
 let searchResults: Array<any>;
 
+let preferedSearch: string | null = "false",
+  deniedLocationPermission: boolean = false;
+
 let headerElement = document.querySelector("header")! as HTMLElement,
   headerWeatherElement = headerElement.querySelector(
     ".header-weather"
   )! as HTMLElement,
   searchBar = headerElement.querySelector(".search-bar")! as HTMLElement,
-  searchIcon = searchBar.querySelector(".search-icon")! as HTMLElement,
   searchInput = searchBar.querySelector(".search-input")! as HTMLInputElement,
   searchResultsElement = searchBar.querySelector(
     ".search-results"
   )! as HTMLUListElement,
   contentElement = document.querySelector(".content")! as HTMLElement;
+export let locationMessage = document.querySelector(
+  ".location-message"
+)! as HTMLElement;
 
-export let currentWeatherCard: CurrentWeatherCard,
-  hourlyWeatherCard: HourlyWeatherCard;
+export let currentWeatherCard: CurrentWeatherCard | null,
+  hourlyWeatherCard: HourlyWeatherCard | null;
 
 window.addEventListener("load", async () => {
-  // Getting location data
-  locationData = await getUserLocation();
+  if (localStorage.getItem("preferedSearch")) {
+    preferedSearch = localStorage.getItem("preferedSearch");
 
-  // Getting weather data
-  await updateWeatherData();
+    if (preferedSearch === "true") {
+      locationData = {
+        latitude: parseFloat(localStorage.getItem("lastLatitude")!),
+        longitude: parseFloat(localStorage.getItem("lastLongitude")!),
+        timezone: localStorage.getItem("lastTimezone")!,
+        country: localStorage.getItem("lastCountry")!,
+        city: localStorage.getItem("lastCity")!,
+      };
 
-  // Setting document elements
-  currentWeatherCard = new CurrentWeatherCard(
-    new Date(weatherData.current.time)
-  );
-  hourlyWeatherCard = new HourlyWeatherCard();
+      await updateWeatherData();
+    }
+  }
 
-  // Updating document elements
-  contentElement.append(
-    currentWeatherCard.element!,
-    hourlyWeatherCard.element!
-  );
+  await checkLocationPermission();
 
   // Document events
   window.addEventListener("scroll", () => {
@@ -118,6 +123,29 @@ window.addEventListener("load", async () => {
   });
 });
 
+async function checkLocationPermission() {
+  navigator.geolocation.getCurrentPosition(() => {});
+
+  navigator.permissions.query({ name: "geolocation" }).then(async (result) => {
+    if (result.state === "granted") {
+      deniedLocationPermission = false;
+      preferedSearch = "false";
+      localStorage.setItem("preferedSearch", "false");
+      locationMessage.classList.remove("enabled");
+      await updateUserWeather();
+    } else if (preferedSearch != "true") {
+      deniedLocationPermission = true;
+      locationMessage.classList.add("enabled");
+      currentWeatherCard!.element?.remove();
+      hourlyWeatherCard!.element?.remove();
+      currentWeatherCard = null;
+      hourlyWeatherCard = null;
+    }
+
+    result.addEventListener("change", checkLocationPermission);
+  });
+}
+
 async function getUserLocation(): Promise<{
   latitude: number;
   longitude: number;
@@ -142,6 +170,22 @@ async function getUserLocation(): Promise<{
       reject("Can't get user location, search instead");
     }
   });
+}
+
+async function updateUserWeather() {
+  locationData = await getUserLocation();
+  await updateWeatherData();
+
+  if (!currentWeatherCard) {
+    currentWeatherCard = new CurrentWeatherCard(
+      new Date(weatherData.current.time)
+    );
+    contentElement.append(currentWeatherCard.element!);
+  }
+  if (!hourlyWeatherCard) {
+    hourlyWeatherCard = new HourlyWeatherCard();
+    contentElement.append(hourlyWeatherCard.element!);
+  }
 }
 
 async function updateWeatherData() {
@@ -189,9 +233,26 @@ async function updateWeatherData() {
   searchInput.placeholder = locationData.country
     ? `${locationData.city}, ${locationData.country}`
     : locationData.city;
+
+  if (!currentWeatherCard) {
+    currentWeatherCard = new CurrentWeatherCard(
+      new Date(weatherData.current.time)
+    );
+    contentElement.append(currentWeatherCard.element!);
+  }
+  if (!hourlyWeatherCard) {
+    hourlyWeatherCard = new HourlyWeatherCard();
+    contentElement.append(hourlyWeatherCard.element!);
+  }
 }
 
 async function updateSearchResults() {
+  if (deniedLocationPermission && preferedSearch != "true") {
+    preferedSearch = "true";
+    localStorage.setItem("preferedSearch", "true");
+    locationMessage.classList.remove("enabled");
+  }
+
   searchResultsElement.innerHTML = "";
 
   searchResults = await fetchCities(searchInput.value);
@@ -235,9 +296,18 @@ async function updateSearchResults() {
         city: searchResults[i].name,
       };
 
+      if (preferedSearch === "true") {
+        localStorage.setItem("lastLatitude", searchResults[i].latitude);
+        localStorage.setItem("lastLongitude", searchResults[i].longitude);
+        localStorage.setItem("lastTimezone", searchResults[i].timezone);
+        localStorage.setItem("lastCountry", searchResults[i].country);
+        localStorage.setItem("lastCity", searchResults[i].name);
+      }
+
       await updateWeatherData();
-      await currentWeatherCard.updateWeather();
-      await hourlyWeatherCard.updateWeather();
+
+      await currentWeatherCard!.updateWeather();
+      await hourlyWeatherCard!.updateWeather();
     });
 
     resultItem.append(resultfirstLine, resultSecondLine);
