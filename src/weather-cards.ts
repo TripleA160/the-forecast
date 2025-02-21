@@ -388,4 +388,9 @@ export class HourlyWeatherCard {
     );
     this.hoursNav.navigateToCurrent(true);
   }
+
+  async updateWeather() {
+    await this.daysNav.updateWeather();
+    await this.hoursNav.updateWeather(this.daysNav.selectedDay!);
+  }
 }

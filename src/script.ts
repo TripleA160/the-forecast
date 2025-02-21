@@ -1,9 +1,18 @@
-import { fetchUserLocation, fetchWeatherApi } from "./api-fetcher.js";
-import { DaysNav, HoursNav } from "./nav.js";
+import {
+  fetchWeatherApi,
+  fetchCities,
+  fetchUserLocation,
+} from "./api-fetcher.js";
 import { CurrentWeatherCard, HourlyWeatherCard } from "./weather-cards.js";
 
 // Initial state
-let locationData: { latitude: number; longitude: number; timezone: string };
+let locationData: {
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  country: string;
+  city: string;
+};
 export let weatherData: {
   current: {
     time: string;
@@ -35,26 +44,107 @@ export let weatherData: {
   };
 };
 
-let contentElement: HTMLElement,
-  headerElement: HTMLElement,
-  headerWeatherElement: HTMLElement,
-  hourlyWeatherElement: HTMLElement;
+let searchResults: Array<any>;
+
+let headerElement = document.querySelector("header")! as HTMLElement,
+  headerWeatherElement = headerElement.querySelector(
+    ".header-weather"
+  )! as HTMLElement,
+  searchBar = headerElement.querySelector(".search-bar")! as HTMLElement,
+  searchIcon = searchBar.querySelector(".search-icon")! as HTMLElement,
+  searchInput = searchBar.querySelector(".search-input")! as HTMLInputElement,
+  searchResultsElement = searchBar.querySelector(
+    ".search-results"
+  )! as HTMLUListElement,
+  contentElement = document.querySelector(".content")! as HTMLElement;
 
 export let currentWeatherCard: CurrentWeatherCard,
   hourlyWeatherCard: HourlyWeatherCard;
-let daysNav: DaysNav, hoursNav: HoursNav;
 
 window.addEventListener("load", async () => {
   // Getting location data
-  const locationResponse = await fetchUserLocation();
-
-  locationData = {
-    latitude: locationResponse.location.latitude,
-    longitude: locationResponse.location.longitude,
-    timezone: locationResponse.location.timezone,
-  };
+  locationData = await getUserLocation();
 
   // Getting weather data
+  await updateWeatherData();
+
+  // Setting document elements
+  currentWeatherCard = new CurrentWeatherCard(
+    new Date(weatherData.current.time)
+  );
+  hourlyWeatherCard = new HourlyWeatherCard();
+
+  // Updating document elements
+  contentElement.append(
+    currentWeatherCard.element!,
+    hourlyWeatherCard.element!
+  );
+
+  // Document events
+  window.addEventListener("scroll", () => {
+    window.scrollY <= headerElement!.getBoundingClientRect().height / 2
+      ? headerElement!.classList.remove("floating")
+      : headerElement!.classList.add("floating");
+  });
+
+  headerWeatherElement!.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  searchBar.addEventListener("click", () => {
+    searchInput.focus();
+  });
+  searchInput.addEventListener("input", async () => {
+    if (searchInput.value.length < 2) {
+      searchResultsElement.innerHTML = "";
+      searchResultsElement.classList.remove("expanded");
+      return;
+    }
+    await updateSearchResults();
+  });
+  searchInput.addEventListener("focus", async () => {
+    if (searchInput.value.length < 2) {
+      searchResultsElement.innerHTML = "";
+      searchResultsElement.classList.remove("expanded");
+      return;
+    }
+    await updateSearchResults();
+  });
+  searchInput.addEventListener("blur", (e) => {
+    if (!searchResultsElement.contains(e.relatedTarget as Node)) {
+      searchResultsElement.innerHTML = "";
+      searchResultsElement.classList.remove("expanded");
+    }
+  });
+});
+
+async function getUserLocation(): Promise<{
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  country: string;
+  city: string;
+}> {
+  const userLoc = await fetchUserLocation();
+
+  return new Promise((resolve, reject) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          country: userLoc.country,
+          city: userLoc.city,
+        });
+      }, reject);
+    } else {
+      reject("Can't get user location, search instead");
+    }
+  });
+}
+
+async function updateWeatherData() {
   const weatherResponse = await fetchWeatherApi(
     locationData.latitude,
     locationData.longitude,
@@ -92,28 +182,72 @@ window.addEventListener("load", async () => {
     },
   };
 
-  // Setting document elements
-  contentElement = document.querySelector(".content")!;
-  headerElement = document.querySelector("header")!;
-  headerWeatherElement = headerElement!.querySelector(".header-weather")!;
-  currentWeatherCard = new CurrentWeatherCard(
-    new Date(weatherData.current.time)
-  );
-  hourlyWeatherCard = new HourlyWeatherCard();
+  headerElement.querySelector(".header-loc")!.textContent = locationData.city;
+  headerElement.querySelector(".header-temp")!.textContent =
+    Math.round(weatherData.current.temp) + "°";
 
-  // Updating document elements
-  contentElement.append(
-    currentWeatherCard.element!,
-    hourlyWeatherCard.element!
-  );
+  searchInput.placeholder = locationData.country
+    ? `${locationData.city}, ${locationData.country}`
+    : locationData.city;
+}
 
-  // Document events
-  window.addEventListener("scroll", () => {
-    window.scrollY <= headerElement!.getBoundingClientRect().height / 2
-      ? headerElement!.classList.remove("floating")
-      : headerElement!.classList.add("floating");
-  });
-  headerWeatherElement!.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-});
+async function updateSearchResults() {
+  searchResultsElement.innerHTML = "";
+
+  searchResults = await fetchCities(searchInput.value);
+  if (!searchResults) return;
+
+  for (let i = 0; i < searchResults.length; i++) {
+    const resultItem = document.createElement("li");
+    resultItem.className = "search-result";
+    resultItem.setAttribute("data-index", i.toString());
+    resultItem.tabIndex = 0;
+    const resultfirstLine = document.createElement("div");
+    resultfirstLine.className = "search-result-line-1";
+    const resultSecondLine = document.createElement("div");
+    resultSecondLine.className = "search-result-line-2";
+
+    const name = searchResults[i].name,
+      admin = searchResults[i].admin1,
+      country = searchResults[i].country;
+
+    resultfirstLine.dir = isRTL(name) ? "rtl" : "ltr";
+    resultfirstLine.textContent = name;
+
+    if (admin && admin != name) {
+      resultSecondLine.dir = isRTL(admin) ? "rtl" : "ltr";
+      resultSecondLine.textContent = country ? `${admin}, ${country}` : admin;
+    } else if (country) {
+      resultSecondLine.dir = isRTL(country) ? "rtl" : "ltr";
+      resultSecondLine.textContent = country;
+    }
+
+    resultItem.addEventListener("click", async () => {
+      searchInput.value = "";
+      searchResultsElement.innerHTML = "";
+      searchResultsElement.classList.remove("expanded");
+
+      locationData = {
+        latitude: searchResults[i].latitude,
+        longitude: searchResults[i].longitude,
+        timezone: searchResults[i].timezone,
+        country: searchResults[i].country,
+        city: searchResults[i].name,
+      };
+
+      await updateWeatherData();
+      await currentWeatherCard.updateWeather();
+      await hourlyWeatherCard.updateWeather();
+    });
+
+    resultItem.append(resultfirstLine, resultSecondLine);
+    searchResultsElement.append(resultItem);
+    searchResultsElement.classList.add("expanded");
+  }
+}
+
+export function isRTL(text: string) {
+  const rtlPattern =
+    /[\u0590-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB1D-\uFDFD\uFE70-\uFEFF]/;
+  return rtlPattern.test(text);
+}
