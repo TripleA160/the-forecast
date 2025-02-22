@@ -136,10 +136,17 @@ async function checkLocationPermission() {
     } else if (preferedSearch != "true") {
       deniedLocationPermission = true;
       locationMessage.classList.add("enabled");
-      currentWeatherCard!.element?.remove();
-      hourlyWeatherCard!.element?.remove();
-      currentWeatherCard = null;
-      hourlyWeatherCard = null;
+      headerWeatherElement.querySelector(".header-loc")!.textContent = "";
+      headerWeatherElement.querySelector(".header-temp")!.textContent = "";
+      searchInput.placeholder = "";
+      if (currentWeatherCard) {
+        currentWeatherCard!.element?.remove();
+        currentWeatherCard = null;
+      }
+      if (hourlyWeatherCard) {
+        hourlyWeatherCard!.element?.remove();
+        hourlyWeatherCard = null;
+      }
     }
 
     result.addEventListener("change", checkLocationPermission);
@@ -226,8 +233,9 @@ async function updateWeatherData() {
     },
   };
 
-  headerElement.querySelector(".header-loc")!.textContent = locationData.city;
-  headerElement.querySelector(".header-temp")!.textContent =
+  headerWeatherElement.querySelector(".header-loc")!.textContent =
+    locationData.city;
+  headerWeatherElement.querySelector(".header-temp")!.textContent =
     Math.round(weatherData.current.temp) + "°";
 
   searchInput.placeholder = locationData.country
@@ -247,12 +255,6 @@ async function updateWeatherData() {
 }
 
 async function updateSearchResults() {
-  if (deniedLocationPermission && preferedSearch != "true") {
-    preferedSearch = "true";
-    localStorage.setItem("preferedSearch", "true");
-    locationMessage.classList.remove("enabled");
-  }
-
   searchResultsElement.innerHTML = "";
 
   searchResults = await fetchCities(searchInput.value);
@@ -284,6 +286,12 @@ async function updateSearchResults() {
     }
 
     resultItem.addEventListener("click", async () => {
+      if (deniedLocationPermission && preferedSearch != "true") {
+        preferedSearch = "true";
+        localStorage.setItem("preferedSearch", "true");
+        locationMessage.classList.remove("enabled");
+      }
+
       searchInput.value = "";
       searchResultsElement.innerHTML = "";
       searchResultsElement.classList.remove("expanded");
