@@ -46,7 +46,7 @@ export async function fetchUserLocation(): Promise<{
           locationMessage.classList.remove("enabled");
           try {
             const response = await fetch(
-              `http://api.geonames.org/findNearbyPlaceNameJSON?lat=${position.coords.latitude}&lng=${position.coords.longitude}&username=Triple_A`
+              `https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${position.coords.latitude}&lng=${position.coords.longitude}&username=Triple_A`
             );
             const data = await response.json();
             resolve({

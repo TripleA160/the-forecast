@@ -29,7 +29,7 @@ export async function fetchUserLocation() {
                 navigator.geolocation.getCurrentPosition(async (position) => {
                     locationMessage.classList.remove("enabled");
                     try {
-                        const response = await fetch(`http://api.geonames.org/findNearbyPlaceNameJSON?lat=${position.coords.latitude}&lng=${position.coords.longitude}&username=Triple_A`);
+                        const response = await fetch(`https://secure.geonames.org/findNearbyPlaceNameJSON?lat=${position.coords.latitude}&lng=${position.coords.longitude}&username=Triple_A`);
                         const data = await response.json();
                         resolve({
                             country: data.geonames[0].countryName,
