@@ -22,6 +22,7 @@ export let weatherData: {
     pressure: number;
     windSpeed: number;
     windDirection: number;
+    isDay: number;
   };
   hourly: {
     time: Array<string>;
@@ -47,7 +48,10 @@ export let weatherData: {
 let searchResults: Array<any>;
 
 let preferedSearch: string | null = "false",
-  deniedLocationPermission: boolean = false;
+  grantedLocationPermission: boolean = false,
+  canGetLocation: boolean = false;
+
+export let singleDayView: boolean = false;
 
 let headerElement = document.querySelector("header")! as HTMLElement,
   headerWeatherElement = headerElement.querySelector(
@@ -85,7 +89,12 @@ window.addEventListener("load", async () => {
 
   await checkLocationPermission();
 
+  singleDayView = window.innerWidth < 400;
+
   // Document events
+  window.addEventListener("resize", () => {
+    singleDayView = window.innerWidth < 400;
+  });
   window.addEventListener("scroll", () => {
     window.scrollY <= headerElement!.getBoundingClientRect().height / 2
       ? headerElement!.classList.remove("floating")
@@ -128,13 +137,10 @@ async function checkLocationPermission() {
 
   navigator.permissions.query({ name: "geolocation" }).then(async (result) => {
     if (result.state === "granted") {
-      deniedLocationPermission = false;
-      preferedSearch = "false";
-      localStorage.setItem("preferedSearch", "false");
-      locationMessage.classList.remove("enabled");
+      grantedLocationPermission = true;
       await updateUserWeather();
     } else if (preferedSearch != "true") {
-      deniedLocationPermission = true;
+      grantedLocationPermission = false;
       locationMessage.classList.add("enabled");
       headerWeatherElement.querySelector(".header-loc")!.textContent = "";
       headerWeatherElement.querySelector(".header-temp")!.textContent = "";
@@ -164,6 +170,11 @@ async function getUserLocation(): Promise<{
 
   return new Promise((resolve, reject) => {
     if (navigator.geolocation) {
+      canGetLocation = true;
+      preferedSearch = "false";
+      localStorage.setItem("preferedSearch", "false");
+      locationMessage.classList.remove("enabled");
+
       navigator.geolocation.getCurrentPosition(async (position) => {
         resolve({
           latitude: position.coords.latitude,
@@ -174,6 +185,8 @@ async function getUserLocation(): Promise<{
         });
       }, reject);
     } else {
+      canGetLocation = false;
+      locationMessage.classList.add("enabled");
       reject("Can't get user location, search instead");
     }
   });
@@ -211,6 +224,7 @@ async function updateWeatherData() {
       pressure: weatherResponse.current.pressure_msl,
       windSpeed: weatherResponse.current.wind_speed_10m,
       windDirection: weatherResponse.current.wind_direction_10m,
+      isDay: weatherResponse.current.is_day,
     },
     hourly: {
       time: weatherResponse.hourly.time,
@@ -286,7 +300,10 @@ async function updateSearchResults() {
     }
 
     resultItem.addEventListener("click", async () => {
-      if (deniedLocationPermission && preferedSearch != "true") {
+      if (
+        !(grantedLocationPermission && canGetLocation) &&
+        preferedSearch != "true"
+      ) {
         preferedSearch = "true";
         localStorage.setItem("preferedSearch", "true");
         locationMessage.classList.remove("enabled");

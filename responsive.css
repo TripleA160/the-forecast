@@ -1,0 +1,314 @@
+@media (min-width: 320px) {
+  :root {
+    --font-size-xxs: 5px;
+    --font-size-xs: 6.8px;
+    --font-size-s: 8px;
+    --font-size-m: 9.8px;
+    --font-size-l: 10.4px;
+    --font-size-xl: 19px;
+    --font-size-xxl: 22px;
+    --font-size-xxxl: 68.5px;
+  }
+  header {
+    top: -48px;
+    height: 48px;
+    padding: 10px 32px;
+  }
+  .logo {
+    width: 28px;
+    height: 28px;
+  }
+  .header-weather {
+    display: none;
+  }
+  .search-input {
+    width: 50px;
+  }
+  .search-icon {
+    width: 22px;
+  }
+  .search-label {
+    display: none;
+  }
+  .content {
+    gap: 32px;
+    padding: 32px;
+  }
+  .weather-card {
+    padding: 32px 16px;
+  }
+  .current-weather {
+    flex-direction: column;
+    min-height: 440px;
+  }
+  .current-weather-detail-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .hour-weather-detail-icon {
+    width: 18px;
+    height: 18px;
+  }
+  .current-weather-details {
+    column-gap: 18px;
+    row-gap: 18px;
+  }
+  .days-nav .nav-arrow-icon {
+    width: 16px;
+  }
+  .days-nav-day {
+    aspect-ratio: 1/0.6;
+    min-width: 100%;
+    padding: 12px;
+    border-radius: 24px;
+  }
+  .days-nav-day.selected {
+    border-radius: 24px 24px 0px 0px;
+  }
+  .hours-nav-hour {
+    min-width: 100%;
+  }
+  .hours-nav-container {
+    width: calc(100% - 60px);
+  }
+  .hours-nav {
+    border-radius: 24px;
+  }
+  .day-weather {
+    gap: 24px;
+  }
+  .day-weather-max-temp,
+  .day-weather-min-temp {
+    padding: 1px;
+  }
+  .day-weather .icon {
+    width: 20px;
+  }
+  .hours-nav .nav-arrow {
+    display: none;
+  }
+  .hours-nav-view-button {
+    width: 22px;
+    height: 22px;
+  }
+  .current-weather-wind-direction {
+    width: 10px;
+  }
+  .hour-weather-wind-direction {
+    width: 7px;
+  }
+  .hours-nav-hours::-webkit-scrollbar {
+    height: 3px;
+  }
+}
+
+@media (min-width: 375px) {
+  :root {
+    --font-size-xxs: 6px;
+    --font-size-xs: 7px;
+    --font-size-s: 9px;
+    --font-size-m: 11px;
+    --font-size-l: 13.2px;
+    --font-size-xl: 21px;
+    --font-size-xxl: 24px;
+    --font-size-xxxl: 72px;
+  }
+  .search-input {
+    width: 80px;
+  }
+  .search-icon {
+    width: 24px;
+  }
+  .day-weather .icon {
+    width: 22px;
+  }
+  .hours-nav-hour {
+    min-width: calc((100% - 1 * 8px) / 2);
+  }
+  .hours-nav-view-button {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (min-width: 400px) {
+  .search-input {
+    width: 100px;
+  }
+  .days-nav-day {
+    aspect-ratio: 1/1;
+    min-width: calc((100% - 2 * 8px) / 3);
+  }
+  .day-weather {
+    gap: 8px;
+  }
+  .day-weather .icon {
+    width: 18px;
+  }
+}
+
+@media (min-width: 540px) {
+}
+
+@media (min-width: 768px) {
+  :root {
+    --font-size-xxs: 7.5px;
+    --font-size-xs: 8.5px;
+    --font-size-s: 12.5px;
+    --font-size-m: 15px;
+    --font-size-l: 16px;
+    --font-size-xl: 22px;
+    --font-size-xxl: 27px;
+    --font-size-xxxl: 100px;
+  }
+  header {
+    top: -64px;
+    height: 64px;
+    padding: 10px 64px;
+  }
+  .logo {
+    width: 44px;
+    height: 44px;
+  }
+  .header-weather {
+    display: flex;
+  }
+  .search-input {
+    width: 180px;
+  }
+  .search-icon {
+    width: 28px;
+  }
+  .content {
+    padding: 32px 64px;
+  }
+  .weather-card {
+    padding: 64px 32px;
+  }
+  .current-weather {
+    flex-direction: row;
+    min-height: 255px;
+  }
+  .current-weather-details {
+    column-gap: 12px;
+  }
+  .days-nav .nav-arrow-icon {
+    width: 22px;
+  }
+  .days-nav-day {
+    min-width: calc((100% - 3 * 8px) / 4);
+    padding: 16px;
+    border-radius: 28px;
+  }
+  .days-nav-day.selected {
+    border-radius: 28px 28px 0px 0px;
+  }
+  .hours-nav-hour {
+    min-width: calc((100% - 3 * 8px) / 4);
+  }
+  .hours-nav-container {
+    width: calc(100% - 76px);
+  }
+  .hours-nav {
+    border-radius: 28px;
+  }
+  .day-weather-max-temp,
+  .day-weather-min-temp {
+    padding: 5px;
+  }
+  .day-weather .icon {
+    width: 24px;
+  }
+  .current-weather-wind-direction {
+    width: 13px;
+  }
+  .hour-weather-wind-direction {
+    width: 9px;
+  }
+  .hours-nav .nav-arrow {
+    display: flex;
+  }
+  .hours-nav-view-button {
+    width: 32px;
+    height: 32px;
+  }
+  .hours-nav-hours::-webkit-scrollbar {
+    height: 16px;
+  }
+}
+
+@media (min-width: 864px) {
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --font-size-xxs: 10px;
+    --font-size-xs: 12px;
+    --font-size-s: 16px;
+    --font-size-m: 18px;
+    --font-size-l: 20px;
+    --font-size-xl: 26px;
+    --font-size-xxl: 32px;
+    --font-size-xxxl: 112px;
+  }
+  .search-input {
+    width: 280px;
+  }
+  .search-icon {
+    width: 32px;
+  }
+  .search-label {
+    display: inline-block;
+  }
+  .current-weather-details {
+    column-gap: 48px;
+  }
+  .current-weather-detail-icon {
+    width: 48px;
+    height: 48px;
+  }
+  .hour-weather-detail-icon {
+    width: 24px;
+    height: 24px;
+  }
+  .days-nav-day {
+    min-width: calc((100% - 4 * 8px) / 5);
+  }
+  .hours-nav-hour {
+    min-width: calc((100% - 4 * 8px) / 5);
+  }
+  .day-weather .icon {
+    width: 32px;
+  }
+  .current-weather-wind-direction {
+    width: 17px;
+  }
+  .hour-weather-wind-direction {
+    width: 13px;
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --font-size-xxs: 11.1px;
+    --font-size-xs: 13.6px;
+    --font-size-s: 18px;
+    --font-size-m: 20px;
+    --font-size-l: 24px;
+    --font-size-xl: 32px;
+    --font-size-xxl: 40px;
+    --font-size-xxxl: 128px;
+  }
+  .days-nav-day {
+    min-width: calc((100% - 6 * 8px) / 7);
+  }
+  .hours-nav-hour {
+    min-width: calc((100% - 5 * 8px) / 6);
+  }
+}
+
+@media (min-width: 1440px) {
+  .hours-nav-hour {
+    min-width: calc((100% - 6 * 8px) / 7);
+  }
+}

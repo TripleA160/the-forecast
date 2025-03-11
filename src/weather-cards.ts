@@ -15,7 +15,7 @@ export class CurrentWeatherCard {
   description:
     | ""
     | "Clear sky"
-    | "Mostly sunny"
+    | "Mostly clear"
     | "Partly cloudy"
     | "Mostly cloudy"
     | "Overcast" = "";
@@ -107,7 +107,7 @@ export class CurrentWeatherCard {
       "current-weather-detail current-weather-precipitation";
     precipitationElement.title = "Probability of precipitation";
     const precipitationIcon = document.createElement("div");
-    precipitationIcon.innerHTML = weatherIcons.precipitationIconLarge;
+    precipitationIcon.innerHTML = weatherIcons.precipitationIcon;
     precipitationIcon.className =
       "icon current-weather-detail-icon current-weather-precipitation-icon";
     const precipitationLabel = document.createElement("div");
@@ -135,7 +135,7 @@ export class CurrentWeatherCard {
       "current-weather-detail current-weather-humidity";
     humidityElement.title = "Humidity in the air";
     const humidityIcon = document.createElement("div");
-    humidityIcon.innerHTML = weatherIcons.humidityIconLarge;
+    humidityIcon.innerHTML = weatherIcons.humidityIcon;
     humidityIcon.className =
       "icon current-weather-detail-icon current-weather-humidity-icon";
     const humidityLabel = document.createElement("div");
@@ -158,7 +158,7 @@ export class CurrentWeatherCard {
     uvElement.className = "current-weather-detail current-weather-uv";
     uvElement.title = "UV index";
     const uvIcon = document.createElement("div");
-    uvIcon.innerHTML = weatherIcons.uvIconLarge;
+    uvIcon.innerHTML = weatherIcons.uvIcon;
     uvIcon.className =
       "icon current-weather-detail-icon current-weather-uv-icon";
     const uvLabel = document.createElement("div");
@@ -177,7 +177,7 @@ export class CurrentWeatherCard {
     windElement.className = "current-weather-detail current-weather-wind";
     windElement.title = "Wind";
     const windIcon = document.createElement("div");
-    windIcon.innerHTML = weatherIcons.windIconLarge;
+    windIcon.innerHTML = weatherIcons.windIcon;
     windIcon.className =
       "icon current-weather-detail-icon current-weather-wind-icon";
     const windLabel = document.createElement("div");
@@ -199,7 +199,7 @@ export class CurrentWeatherCard {
     windDirectionIcon.className =
       "icon wind-direction-icon current-weather-wind-direction";
     windDirectionIcon.title = "Wind direction";
-    windDirectionIcon.innerHTML = weatherIcons.windDirectionIconLarge;
+    windDirectionIcon.innerHTML = weatherIcons.windDirectionIcon;
     windText.append(windValue, windUnit, windDirectionIcon);
     windElement.append(windIcon, windLabel, windText);
 
@@ -208,7 +208,7 @@ export class CurrentWeatherCard {
       "current-weather-detail current-weather-pressure";
     pressureElement.title = "Pressure of the air";
     const pressureIcon = document.createElement("div");
-    pressureIcon.innerHTML = weatherIcons.pressureIconLarge;
+    pressureIcon.innerHTML = weatherIcons.pressureIcon;
     pressureIcon.className =
       "icon current-weather-detail-icon current-weather-pressure-icon";
     const pressureLabel = document.createElement("div");
@@ -232,7 +232,7 @@ export class CurrentWeatherCard {
       "current-weather-detail current-weather-visibility";
     visibilityElement.title = "Visibility";
     const visibilityIcon = document.createElement("div");
-    visibilityIcon.innerHTML = weatherIcons.visibilityIconLarge;
+    visibilityIcon.innerHTML = weatherIcons.visibilityIcon;
     visibilityIcon.className =
       "icon current-weather-detail-icon current-weather-visibility-icon";
     const visibilityLabel = document.createElement("div");
@@ -301,20 +301,32 @@ export class CurrentWeatherCard {
 
     switch (this.description) {
       case "Clear sky":
-        this.element!.querySelector(".current-weather-icon")!.innerHTML =
-          weatherIcons.clearSkyIcon;
+        weatherData.current.isDay === 1
+          ? (this.element!.querySelector(".current-weather-icon")!.innerHTML =
+              weatherIcons.clearSkyDayIcon)
+          : (this.element!.querySelector(".current-weather-icon")!.innerHTML =
+              weatherIcons.clearSkyNightIcon);
         break;
-      case "Mostly sunny":
-        this.element!.querySelector(".current-weather-icon")!.innerHTML =
-          weatherIcons.mostlySunnyIcon;
+      case "Mostly clear":
+        weatherData.current.isDay === 1
+          ? (this.element!.querySelector(".current-weather-icon")!.innerHTML =
+              weatherIcons.mostlyClearDayIcon)
+          : (this.element!.querySelector(".current-weather-icon")!.innerHTML =
+              weatherIcons.mostlyClearNightIcon);
         break;
       case "Partly cloudy":
-        this.element!.querySelector(".current-weather-icon")!.innerHTML =
-          weatherIcons.partlyCloudyIcon;
+        weatherData.current.isDay === 1
+          ? (this.element!.querySelector(".current-weather-icon")!.innerHTML =
+              weatherIcons.partlyCloudyDayIcon)
+          : (this.element!.querySelector(".current-weather-icon")!.innerHTML =
+              weatherIcons.partlyCloudyNightIcon);
         break;
       case "Mostly cloudy":
-        this.element!.querySelector(".current-weather-icon")!.innerHTML =
-          weatherIcons.mostlyCloudyIcon;
+        weatherData.current.isDay === 1
+          ? (this.element!.querySelector(".current-weather-icon")!.innerHTML =
+              weatherIcons.mostlyCloudyDayIcon)
+          : (this.element!.querySelector(".current-weather-icon")!.innerHTML =
+              weatherIcons.mostlyCloudyNightIcon);
         break;
       case "Overcast":
         this.element!.querySelector(".current-weather-icon")!.innerHTML =
@@ -342,7 +354,7 @@ export class CurrentWeatherCard {
     this.visibility =
       Math.round((weatherData.hourly.visibility[foundIndex] / 1000) * 10) / 10;
     if (cloudCover <= 10) this.description = "Clear sky";
-    else if (cloudCover <= 30) this.description = "Mostly sunny";
+    else if (cloudCover <= 30) this.description = "Mostly clear";
     else if (cloudCover <= 55) this.description = "Partly cloudy";
     else if (cloudCover <= 85) this.description = "Mostly cloudy";
     else this.description = "Overcast";
@@ -376,7 +388,11 @@ export class HourlyWeatherCard {
     const label = document.createElement("div");
     label.className = "hourly-weather-label";
     label.textContent = "Hourly";
-    this.element.append(label, this.daysNav.element!, this.hoursNav.element!);
+    this.element.append(
+      label,
+      this.daysNav.element!,
+      this.hoursNav.navContainer!
+    );
 
     this.daysNav.setDays(weatherData.daily.time);
     await this.daysNav.updateUI();

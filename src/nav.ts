@@ -1,4 +1,4 @@
-import { weatherData, hourlyWeatherCard } from "./script.js";
+import { weatherData, hourlyWeatherCard, singleDayView } from "./script.js";
 import { uiIcons, weatherIcons } from "./icon-handler.js";
 
 export class DaysNav {
@@ -17,17 +17,19 @@ export class DaysNav {
         ".days-nav-days"
       ) as HTMLElement;
       this.navArrowBack = new NavArrow(
+        this,
         this.daysContainer,
         "back",
-        7,
-        uiIcons.arrowIconBackLarge,
+        true,
+        uiIcons.arrowIconBack,
         element.querySelector(".nav-arrow-back") as HTMLElement
       );
       this.navArrowForward = new NavArrow(
+        this,
         this.daysContainer,
         "forward",
-        7,
-        uiIcons.arrowIconForwardLarge,
+        true,
+        uiIcons.arrowIconForward,
         element.querySelector(".nav-arrow-forward") as HTMLElement
       );
     } else {
@@ -36,16 +38,18 @@ export class DaysNav {
       this.daysContainer = document.createElement("div");
       this.daysContainer.classList.add("days-nav-days");
       this.navArrowBack = new NavArrow(
+        this,
         this.daysContainer,
         "back",
-        7,
-        uiIcons.arrowIconBackLarge
+        true,
+        uiIcons.arrowIconBack
       );
       this.navArrowForward = new NavArrow(
+        this,
         this.daysContainer,
         "forward",
-        7,
-        uiIcons.arrowIconForwardLarge
+        true,
+        uiIcons.arrowIconForward
       );
 
       this.element.appendChild(this.navArrowBack.element!);
@@ -109,16 +113,72 @@ export class DaysNav {
         this.selectedDayIndex > 0 &&
         this.selectedDayIndex < this.days.length - 1
       )
-        this.navigateToDay(
-          this.days[this.selectedDayIndex - 1],
-          navigateInstantly
-        );
+        singleDayView
+          ? this.navigateToDay(this.selectedDay, navigateInstantly)
+          : this.navigateToDay(
+              this.days[this.selectedDayIndex - 1],
+              navigateInstantly
+            );
 
-      await hourlyWeatherCard.hoursNav.updateWeather(this.selectedDay);
+      await hourlyWeatherCard!.hoursNav.updateWeather(this.selectedDay);
       await this.updateUI();
     } else {
       console.error("Tried to select a day that does not exist");
     }
+  }
+  async selectPrevious(navigateInstantly: boolean = false) {
+    if (this.selectedDayIndex === null || this.selectedDayIndex === 0) return;
+
+    if (this.selectedDay != null)
+      this.selectedDay.element!.classList.remove(
+        "selected",
+        "at-left-edge",
+        "at-right-edge",
+        "off-edge"
+      );
+
+    this.selectedDay = this.days[this.selectedDayIndex - 1];
+    this.selectedDay.element!.classList.add("selected");
+    this.selectedDayIndex = this.selectedDayIndex - 1;
+
+    singleDayView
+      ? this.navigateToDay(this.selectedDay, navigateInstantly)
+      : this.navigateToDay(
+          this.days[this.selectedDayIndex - 1],
+          navigateInstantly
+        );
+
+    await hourlyWeatherCard!.hoursNav.updateWeather(this.selectedDay);
+    await this.updateUI();
+  }
+  async selectNext(navigateInstantly: boolean = false) {
+    if (
+      this.selectedDayIndex === null ||
+      this.selectedDayIndex === this.days.length - 1
+    )
+      return;
+
+    if (this.selectedDay != null)
+      this.selectedDay.element!.classList.remove(
+        "selected",
+        "at-left-edge",
+        "at-right-edge",
+        "off-edge"
+      );
+
+    this.selectedDay = this.days[this.selectedDayIndex + 1];
+    this.selectedDay.element!.classList.add("selected");
+    this.selectedDayIndex = this.selectedDayIndex + 1;
+
+    singleDayView
+      ? this.navigateToDay(this.selectedDay, navigateInstantly)
+      : this.navigateToDay(
+          this.days[this.selectedDayIndex - 1],
+          navigateInstantly
+        );
+
+    await hourlyWeatherCard!.hoursNav.updateWeather(this.selectedDay);
+    await this.updateUI();
   }
 
   navigateToDay(day: Day, instant: Boolean = false) {
@@ -149,12 +209,14 @@ export class DaysNav {
       const dayRect = foundDay.element!.getBoundingClientRect();
 
       const atLeftEdge =
-        dayRect.left >= navRect.left - 50 && dayRect.left <= navRect.left + 50;
+        dayRect.left >= navRect.left - dayRect.width &&
+        dayRect.left <= navRect.left;
       const atRightEdge =
-        dayRect.right >= navRect.right - 50 &&
-        dayRect.right <= navRect.right + 50;
+        dayRect.right >= navRect.right &&
+        dayRect.right <= navRect.right + dayRect.width;
       const offEdge =
-        dayRect.left < navRect.left - 50 || dayRect.right > navRect.right + 50;
+        dayRect.left < navRect.left - dayRect.width ||
+        dayRect.right > navRect.right + dayRect.width;
 
       return { atLeftEdge, atRightEdge, offEdge };
     }
@@ -163,23 +225,29 @@ export class DaysNav {
   async updateUI() {
     if (this.selectedDay != null) {
       const selectedDayElement = this.selectedDay!.element!;
-      const edgeStatus = this.isDayAtEdge(this.selectedDay!);
 
-      if (edgeStatus?.atLeftEdge) {
-        selectedDayElement.classList.add("at-left-edge");
-        selectedDayElement.classList.remove("at-right-edge", "off-edge");
-      } else if (edgeStatus?.atRightEdge) {
-        selectedDayElement.classList.add("at-right-edge");
-        selectedDayElement.classList.remove("at-left-edge", "off-edge");
-      } else if (edgeStatus?.offEdge) {
-        selectedDayElement.classList.add("off-edge");
-        selectedDayElement.classList.remove("at-left-edge", "at-right-edge");
+      if (singleDayView) {
+        selectedDayElement.classList.add("at-left-edge", "at-right-edge");
+        selectedDayElement.classList.remove("off-edge");
       } else {
-        selectedDayElement.classList.remove(
-          "at-left-edge",
-          "at-right-edge",
-          "off-edge"
-        );
+        const edgeStatus = this.isDayAtEdge(this.selectedDay!);
+
+        if (edgeStatus?.atLeftEdge) {
+          selectedDayElement.classList.add("at-left-edge");
+          selectedDayElement.classList.remove("at-right-edge", "off-edge");
+        } else if (edgeStatus?.atRightEdge) {
+          selectedDayElement.classList.add("at-right-edge");
+          selectedDayElement.classList.remove("at-left-edge", "off-edge");
+        } else if (edgeStatus?.offEdge) {
+          selectedDayElement.classList.add("off-edge");
+          selectedDayElement.classList.remove("at-left-edge", "at-right-edge");
+        } else {
+          selectedDayElement.classList.remove(
+            "at-left-edge",
+            "at-right-edge",
+            "off-edge"
+          );
+        }
       }
     }
 
@@ -198,10 +266,10 @@ export class DaysNav {
 }
 export class HoursNav {
   element: HTMLElement | null = null;
+  navContainer: HTMLElement | null = null;
   hoursContainer: HTMLElement | null = null;
   navArrowBack: NavArrow | null = null;
   navArrowForward: NavArrow | null = null;
-  scrollBar: ScrollBar | null = null;
   hours: Array<Hour> = [];
   selectedHour: Hour | null = null;
   selectedHourIndex: number | null = null;
@@ -213,46 +281,50 @@ export class HoursNav {
         ".hours-nav-hours"
       ) as HTMLElement;
       this.navArrowBack = new NavArrow(
+        this,
         this.hoursContainer,
         "back",
-        1,
-        uiIcons.arrowIconBackSmall,
+        false,
+        uiIcons.arrowIconBack,
         element.querySelector(".nav-arrow-back") as HTMLElement
       );
       this.navArrowForward = new NavArrow(
+        this,
         this.hoursContainer,
         "forward",
-        1,
-        uiIcons.arrowIconForwardSmall,
+        false,
+        uiIcons.arrowIconForward,
         element.querySelector(".nav-arrow-forward") as HTMLElement
-      );
-      this.scrollBar = new ScrollBar(
-        this.hoursContainer,
-        element.querySelector(".scroll-bar") as HTMLElement
       );
     } else {
       this.element = document.createElement("div");
       this.element.classList.add("hours-nav");
+      this.navContainer = document.createElement("div");
+      this.navContainer.classList.add("hours-nav-container");
       this.hoursContainer = document.createElement("div");
       this.hoursContainer.classList.add("hours-nav-hours");
       this.navArrowBack = new NavArrow(
+        this,
         this.hoursContainer,
         "back",
-        1,
-        uiIcons.arrowIconBackSmall
+        false,
+        uiIcons.arrowIconBack
       );
       this.navArrowForward = new NavArrow(
+        this,
         this.hoursContainer,
         "forward",
-        1,
-        uiIcons.arrowIconForwardSmall
+        false,
+        uiIcons.arrowIconForward
       );
-      this.scrollBar = new ScrollBar(this.hoursContainer);
 
-      this.element.appendChild(this.navArrowBack.element!);
-      this.element.appendChild(this.hoursContainer);
-      this.element.appendChild(this.navArrowForward.element!);
-      this.element.appendChild(this.scrollBar.element!);
+      this.element.append(
+        this.navArrowBack.element!,
+        this.hoursContainer,
+        this.navArrowForward.element!
+      );
+
+      this.navContainer.append(this.element);
     }
 
     this.#initializeHours();
@@ -365,7 +437,6 @@ export class HoursNav {
   async updateUI() {
     this.navArrowBack!.updateUI();
     this.navArrowForward!.updateUI();
-    this.scrollBar!.updateUI();
   }
 
   async updateWeather(selectedDay: Day) {
@@ -391,7 +462,7 @@ export class HoursNav {
         Math.round((weatherData.hourly.visibility[foundIndex] / 1000) * 10) /
         10;
       if (cloudCover <= 10) hour.description = "Clear sky";
-      else if (cloudCover <= 30) hour.description = "Mostly sunny";
+      else if (cloudCover <= 30) hour.description = "Mostly clear";
       else if (cloudCover <= 55) hour.description = "Partly cloudy";
       else if (cloudCover <= 85) hour.description = "Mostly cloudy";
       else hour.description = "Overcast";
@@ -539,7 +610,7 @@ class Hour {
   description:
     | ""
     | "Clear sky"
-    | "Mostly sunny"
+    | "Mostly clear"
     | "Partly cloudy"
     | "Mostly cloudy"
     | "Overcast" = "";
@@ -623,7 +694,7 @@ class Hour {
       "hour-weather-detail hour-weather-precipitation";
     precipitationElement.title = "Probability of precipitation";
     const precipitationIcon = document.createElement("div");
-    precipitationIcon.innerHTML = weatherIcons.precipitationIconSmall;
+    precipitationIcon.innerHTML = weatherIcons.precipitationIcon;
     precipitationIcon.className =
       "icon hour-weather-detail-icon hour-weather-precipitation-icon";
     const precipitationText = document.createElement("div");
@@ -642,7 +713,7 @@ class Hour {
     humidityElement.className = "hour-weather-detail hour-weather-humidity";
     humidityElement.title = "Humidity in the air";
     const humidityIcon = document.createElement("div");
-    humidityIcon.innerHTML = weatherIcons.humidityIconSmall;
+    humidityIcon.innerHTML = weatherIcons.humidityIcon;
     humidityIcon.className =
       "icon hour-weather-detail-icon hour-weather-humidity-icon";
     const humidityText = document.createElement("div");
@@ -661,7 +732,7 @@ class Hour {
     uvElement.className = "hour-weather-detail hour-weather-uv";
     uvElement.title = "UV index";
     const uvIcon = document.createElement("div");
-    uvIcon.innerHTML = weatherIcons.uvIconSmall;
+    uvIcon.innerHTML = weatherIcons.uvIcon;
     uvIcon.className = "icon hour-weather-detail-icon hour-weather-uv-icon";
     const uvText = document.createElement("div");
     uvText.className = "hour-weather-detail-text hour-weather-uv-text";
@@ -676,7 +747,7 @@ class Hour {
     windElement.className = "hour-weather-detail hour-weather-wind";
     windElement.title = "Wind";
     const windIcon = document.createElement("div");
-    windIcon.innerHTML = weatherIcons.windIconSmall;
+    windIcon.innerHTML = weatherIcons.windIcon;
     windIcon.className = "icon hour-weather-detail-icon hour-weather-wind-icon";
     const windText = document.createElement("div");
     windText.className = "hour-weather-detail-text hour-weather-wind-text";
@@ -690,7 +761,7 @@ class Hour {
     windDirectionIcon.className =
       "icon wind-direction-icon hour-weather-wind-direction";
     windDirectionIcon.title = "Wind direction";
-    windDirectionIcon.innerHTML = weatherIcons.windDirectionIconSmall;
+    windDirectionIcon.innerHTML = weatherIcons.windDirectionIcon;
     windText.append(windValue, windUnit, windDirectionIcon);
     windElement.append(windIcon, windText);
 
@@ -698,7 +769,7 @@ class Hour {
     pressureElement.className = "hour-weather-detail hour-weather-pressure";
     pressureElement.title = "Pressure of the air";
     const pressureIcon = document.createElement("div");
-    pressureIcon.innerHTML = weatherIcons.pressureIconSmall;
+    pressureIcon.innerHTML = weatherIcons.pressureIcon;
     pressureIcon.className =
       "icon hour-weather-detail-icon hour-weather-pressure-icon";
     const pressureText = document.createElement("div");
@@ -717,7 +788,7 @@ class Hour {
     visibilityElement.className = "hour-weather-detail hour-weather-visibility";
     visibilityElement.title = "Visibility";
     const visibilityIcon = document.createElement("div");
-    visibilityIcon.innerHTML = weatherIcons.visibilityIconSmall;
+    visibilityIcon.innerHTML = weatherIcons.visibilityIcon;
     visibilityIcon.className =
       "icon hour-weather-detail-icon hour-weather-visibility-icon";
     const visibilityText = document.createElement("div");
@@ -779,22 +850,26 @@ class Hour {
 }
 
 export class NavArrow {
+  nav: HoursNav | DaysNav;
   element: HTMLElement | null = null;
   navigationElement: HTMLElement | null = null;
   iconElement: HTMLElement | null = null;
   direction: "back" | "forward" = "forward";
-  elementCount: number = 1;
+  wholeElement: boolean = false;
   held: boolean = false;
   navigating: boolean = false;
   holdTimeout: number = 0;
 
   constructor(
+    nav: HoursNav | DaysNav,
     navigationElement: HTMLElement | null,
     direction: "back" | "forward" = "forward",
-    elementCount: number = 1,
+    wholeElement: boolean = false,
     icon: string | null = null,
     element: HTMLElement | null = null
   ) {
+    this.nav = nav;
+
     if (element) {
       this.element = element;
       this.iconElement = element.querySelector(".nav-arrow-icon");
@@ -812,18 +887,17 @@ export class NavArrow {
     if (direction === "back") {
       this.element!.classList.add("nav-arrow-back");
       this.iconElement!.classList.add("nav-arrow-icon-back");
-      this.iconElement!.innerHTML =
-        icon != null ? icon : uiIcons.arrowIconBackLarge;
+      this.iconElement!.innerHTML = icon != null ? icon : uiIcons.arrowIconBack;
       this.direction = "back";
     } else {
       this.element!.classList.add("nav-arrow-forward");
       this.iconElement!.classList.add("nav-arrow-icon-forward");
       this.iconElement!.innerHTML =
-        icon != null ? icon : uiIcons.arrowIconForwardLarge;
+        icon != null ? icon : uiIcons.arrowIconForward;
       this.direction = "forward";
     }
 
-    this.elementCount = elementCount;
+    this.wholeElement = wholeElement;
 
     //event listeners
     this.element!.addEventListener("mousedown", () => {
@@ -896,102 +970,31 @@ export class NavArrow {
   navigate() {
     if (this.navigating) return;
 
-    const currentScroll = Math.ceil(this.navigationElement!.scrollLeft);
-    const childWidth =
-      this.navigationElement!.firstElementChild!.getBoundingClientRect().width;
-    const scrollAmount =
-      (childWidth +
-        (Math.ceil(parseFloat(getComputedStyle(this.navigationElement!).gap)) ||
-          0)) *
-      this.elementCount;
-
-    this.navigationElement!.scrollTo({
-      left:
-        this.direction === "back"
-          ? currentScroll - scrollAmount
-          : currentScroll + scrollAmount,
-      behavior: "smooth",
-    });
-
-    this.navigating = true;
-  }
-}
-
-export class ScrollBar {
-  element: HTMLElement | null = null;
-  navigationElement: HTMLElement | null = null;
-  grabbed: boolean = false;
-  initialX: number = 0;
-  initialScroll: number = 0;
-
-  constructor(
-    navigationElement: HTMLElement | null,
-    element: HTMLElement | null = null
-  ) {
-    if (element) {
-      this.element = element;
+    if (this.nav instanceof DaysNav && singleDayView) {
+      this.direction === "back"
+        ? this.nav.selectPrevious()
+        : this.nav.selectNext();
     } else {
-      this.element = document.createElement("div");
-      this.element.classList.add("scroll-bar");
-      this.element.classList.add("interactable");
+      const currentScroll = Math.ceil(this.navigationElement!.scrollLeft);
+      const childWidth =
+        this.navigationElement!.firstElementChild!.getBoundingClientRect()
+          .width;
+      const gap =
+        Math.ceil(parseFloat(getComputedStyle(this.navigationElement!).gap)) ||
+        0;
+      const scrollAmount = this.wholeElement
+        ? this.navigationElement!.getBoundingClientRect().width + gap
+        : childWidth + gap;
+
+      this.navigationElement!.scrollTo({
+        left:
+          this.direction === "back"
+            ? currentScroll - scrollAmount
+            : currentScroll + scrollAmount,
+        behavior: "smooth",
+      });
     }
 
-    this.navigationElement = navigationElement;
-
-    //event listeners
-    this.element!.addEventListener("mousedown", (e) => {
-      if (e.button === 0) {
-        this.grabbed = true;
-        this.initialX = e.clientX;
-        this.initialScroll = this.navigationElement!.scrollLeft;
-        this.element!.classList.add("grabbed");
-      }
-    });
-    document.addEventListener("mouseup", (e) => {
-      if (e.button === 0) {
-        this.grabbed = false;
-        this.element!.classList.remove("grabbed");
-      }
-    });
-    document.addEventListener("mousemove", (e) => {
-      if (this.grabbed) {
-        const mouseOffset = e.clientX - this.initialX;
-        const containerWidth =
-          this.navigationElement!.getBoundingClientRect().width;
-        const scrollWidth = this.navigationElement!.scrollWidth;
-        const scrollBarWidth = this.element!.getBoundingClientRect().width;
-        const maxScroll = scrollWidth - containerWidth;
-        const scrollRatio = maxScroll / (containerWidth - scrollBarWidth);
-
-        this.navigationElement!.scrollTo({
-          left: this.initialScroll + mouseOffset * scrollRatio,
-          behavior: "instant",
-        });
-      }
-    });
-
-    this.navigationElement!.addEventListener("scroll", () => {
-      this.updateUI();
-    });
-
-    window.addEventListener("resize", () => {
-      this.updateUI();
-    });
-  }
-
-  async updateUI() {
-    const currentScroll = Math.round(this.navigationElement!.scrollLeft);
-    const containerWidth =
-      this.navigationElement!.getBoundingClientRect().width;
-    const scrollWidth = this.navigationElement!.scrollWidth;
-    const maxScroll = scrollWidth - containerWidth;
-    const scrollArea = containerWidth - 32;
-
-    const newWidth = ((scrollArea / scrollWidth) * scrollArea) / 2;
-    const newPosition =
-      16 + (currentScroll / maxScroll) * (scrollArea - newWidth);
-
-    this.element!.style.width = `${newWidth}px`;
-    this.element!.style.left = `${newPosition}px`;
+    this.navigating = true;
   }
 }
