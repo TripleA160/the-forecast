@@ -124,11 +124,12 @@ export class DaysNav {
             const navRect = this.daysContainer.getBoundingClientRect();
             const dayRect = foundDay.element.getBoundingClientRect();
             const atLeftEdge = dayRect.left >= navRect.left - dayRect.width &&
-                dayRect.left <= navRect.left;
-            const atRightEdge = dayRect.right >= navRect.right &&
+                dayRect.left <= navRect.left + 28;
+            const atRightEdge = dayRect.right >= navRect.right - 28 &&
                 dayRect.right <= navRect.right + dayRect.width;
             const offEdge = dayRect.left < navRect.left - dayRect.width ||
                 dayRect.right > navRect.right + dayRect.width;
+            console.log(dayRect.right, navRect.right, dayRect.width);
             return { atLeftEdge, atRightEdge, offEdge };
         }
     }

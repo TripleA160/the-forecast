@@ -210,13 +210,14 @@ export class DaysNav {
 
       const atLeftEdge =
         dayRect.left >= navRect.left - dayRect.width &&
-        dayRect.left <= navRect.left;
+        dayRect.left <= navRect.left + 28;
       const atRightEdge =
-        dayRect.right >= navRect.right &&
+        dayRect.right >= navRect.right - 28 &&
         dayRect.right <= navRect.right + dayRect.width;
       const offEdge =
         dayRect.left < navRect.left - dayRect.width ||
         dayRect.right > navRect.right + dayRect.width;
+      console.log(dayRect.right, navRect.right, dayRect.width);
 
       return { atLeftEdge, atRightEdge, offEdge };
     }
