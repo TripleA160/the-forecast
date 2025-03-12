@@ -14,7 +14,7 @@
     height: 48px;
     padding: 10px 32px;
   }
-  .logo {
+  .logo-icon {
     width: 28px;
     height: 28px;
   }
@@ -69,7 +69,7 @@
     min-width: 100%;
   }
   .hours-nav-container {
-    width: calc(100% - 60px);
+    width: calc(100% - 64px);
   }
   .hours-nav {
     border-radius: 24px;
@@ -87,10 +87,6 @@
   .hours-nav .nav-arrow {
     display: none;
   }
-  .hours-nav-view-button {
-    width: 22px;
-    height: 22px;
-  }
   .current-weather-wind-direction {
     width: 10px;
   }
@@ -98,11 +94,11 @@
     width: 7px;
   }
   .hours-nav-hours::-webkit-scrollbar {
-    height: 3px;
+    height: 10px;
   }
 }
 
-@media (min-width: 375px) {
+@media (min-width: 360px) {
   :root {
     --font-size-xxs: 6px;
     --font-size-xs: 7px;
@@ -113,6 +109,12 @@
     --font-size-xxl: 24px;
     --font-size-xxxl: 72px;
   }
+  .hours-nav-hour {
+    min-width: calc((100% - 1 * 8px) / 2);
+  }
+}
+
+@media (min-width: 375px) {
   .search-input {
     width: 80px;
   }
@@ -121,13 +123,6 @@
   }
   .day-weather .icon {
     width: 22px;
-  }
-  .hours-nav-hour {
-    min-width: calc((100% - 1 * 8px) / 2);
-  }
-  .hours-nav-view-button {
-    width: 24px;
-    height: 24px;
   }
 }
 
@@ -166,7 +161,7 @@
     height: 64px;
     padding: 10px 64px;
   }
-  .logo {
+  .logo-icon {
     width: 44px;
     height: 44px;
   }
@@ -227,10 +222,6 @@
   }
   .hours-nav .nav-arrow {
     display: flex;
-  }
-  .hours-nav-view-button {
-    width: 32px;
-    height: 32px;
   }
   .hours-nav-hours::-webkit-scrollbar {
     height: 16px;

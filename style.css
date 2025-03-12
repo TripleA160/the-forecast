@@ -49,12 +49,12 @@ header.floating {
   top: 0px;
   background: rgba(0, 0, 0, 0.45);
 }
-.logo-container {
+.logo {
   display: flex;
   align-items: center;
   flex-grow: 1;
 }
-.logo {
+.logo-icon {
   width: 44px;
   height: 44px;
 }
@@ -67,7 +67,7 @@ header.floating {
   color: inherit;
   text-decoration: none;
 }
-.title {
+.logo-title {
   -webkit-user-select: none;
   user-select: none;
   margin-left: 10px;
@@ -89,7 +89,7 @@ header.floating {
   padding: 5px 10px;
   background: rgba(255, 255, 255, 0.08);
   font-size: var(--font-size-s);
-  transition: border-radius 0.25s linear;
+  transition: border-radius 0.25s linear, width 0.25s ease;
 }
 .search-bar:has(.search-results.expanded) {
   border-radius: 8px 8px 0px 0px;
@@ -181,6 +181,7 @@ header.floating .search-results {
   left: 50%;
   transform: translate(-50%, -50%);
   width: 100%;
+  padding: 32px;
   font-size: var(--font-size-xl);
   text-align: center;
 }
@@ -532,34 +533,11 @@ header.floating .search-results {
     rgba(22, 37, 68, 0) 73%
   );
 }
-.hours-nav-view-button {
-  cursor: pointer;
-  position: absolute;
-  top: 0px;
-  left: calc(100% + 16px);
-  width: 32px;
-  height: 32px;
-  padding: 6px;
-  border-radius: 10px;
-  border: none;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(22, 37, 68, 0.7);
-  rotate: 90deg;
-}
-.hours-nav.list-view ~ .hours-nav-view-button {
-  rotate: 0deg;
-}
-.hours-nav-view-button:hover {
-  color: rgba(255, 255, 255, 0.1);
-}
 .hours-nav-hours {
   overflow: auto;
   flex-direction: row;
   padding: 16px 8px;
   max-height: 600px;
-}
-.hours-nav.list-view .hours-nav-hours {
-  flex-direction: column;
 }
 .hours-nav-hours::-webkit-scrollbar {
   height: 16px;
@@ -588,9 +566,6 @@ header.floating .search-results {
   background: #162544;
   font-size: var(--font-size-s);
 }
-.hours-nav.list-view .hours-nav-hour {
-  flex-direction: row;
-}
 .hours-nav-hour.current {
   border: 1px solid rgba(255, 255, 255, 0.4);
   -webkit-box-shadow: 0px 0px 4px 2px rgba(255, 255, 255, 0.2);
@@ -601,12 +576,6 @@ header.floating .search-results {
   border-right: none;
   border-bottom: 1px solid #fff;
 }
-.hours-nav.list-view .hour-text {
-  padding: 0px 8px 0px 0px;
-  border-right: 1px solid #fff;
-  border-bottom: none;
-  min-width: 9%;
-}
 .hour-weather {
   position: relative;
   display: flex;
@@ -615,21 +584,11 @@ header.floating .search-results {
   flex: 1;
   gap: 16px;
 }
-.hours-nav.list-view .hour-weather {
-  flex-direction: row;
-  min-width: 90%;
-  height: 100%;
-}
 .hour-weather-forecast {
   display: flex;
   align-items: center;
   flex-direction: column;
   gap: 8px;
-}
-.hours-nav.list-view .hour-weather-forecast {
-  flex-direction: row;
-  gap: 16px;
-  min-width: 30%;
 }
 .hour-weather-temp,
 .hour-weather-apparent-temp {
@@ -652,10 +611,6 @@ header.floating .search-results {
   gap: 8px;
   font-size: var(--font-size-s);
 }
-.hours-nav.list-view .hour-weather-summary,
-.hours-nav.list-view .hour-weather-apparent-temp {
-  flex-direction: row;
-}
 .hour-weather-apparent-temp-label {
   color: #bebebe;
 }
@@ -668,14 +623,6 @@ header.floating .search-results {
   grid-template-rows: repeat(3, 1fr);
   row-gap: 10px;
 }
-.hours-nav.list-view .hour-weather-details {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 0px 16px;
-  min-width: 70%;
-}
 .hour-weather-detail {
   display: grid;
   grid-template-rows: repeat(2, 50%);
@@ -686,13 +633,6 @@ header.floating .search-results {
   min-height: 100%;
   font-size: var(--font-size-xs);
   text-align: center;
-}
-.hours-nav.list-view .hour-weather-detail {
-  display: flex;
-  gap: 8px;
-  align-content: flex-start;
-  justify-content: center;
-  align-items: center;
 }
 .hour-weather-detail-icon {
   width: 24px;
