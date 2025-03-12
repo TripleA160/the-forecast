@@ -373,7 +373,7 @@ header.floating .search-results {
   padding: 16px;
   min-width: calc(100% / 7 - 8px);
   aspect-ratio: 1/1;
-  border-radius: 28px;
+  border-radius: 24px;
   background: #162544;
   font-size: var(--font-size-xs);
 }
@@ -562,7 +562,7 @@ header.floating .search-results {
   min-width: calc((100% - 6 * 8px) / 7);
   gap: 16px;
   padding: 16px;
-  border-radius: 30px;
+  border-radius: 22px;
   background: #162544;
   font-size: var(--font-size-s);
 }
