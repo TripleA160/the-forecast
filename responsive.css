@@ -94,7 +94,7 @@
     width: 7px;
   }
   .hours-nav-hours::-webkit-scrollbar {
-    height: 10px;
+    height: 1px;
   }
 }
 
